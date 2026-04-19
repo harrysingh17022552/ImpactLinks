@@ -82,6 +82,7 @@ export const runDrawInternal = async (session) => {
         userId: user._id,
         drawId,
         matchCount: matches,
+        userScore: userNumbers,
       });
     }
   }

@@ -3,10 +3,22 @@ import Score from "../models/Score.js";
 import User from "../models/User.js";
 const now = new Date();
 export const generateDrawNumbers = async (session) => {
-  const numbers = new Set();
-  while (numbers.size < 5) {
-    numbers.add(Math.floor(Math.random() * 45) + 1);
+  const from_current_score = [
+    44, 34, 21, 29, 2, 5, 22, 40, 36, 41, 21, 14, 32, 41, 29,
+  ];
+  //This is origina one
+  //const numbers = new Set();
+  // while (numbers.size < 5) {
+  //   numbers.add(Math.floor(Math.random() * 45) + 1);
+  // }
+
+  //Remove this after testing
+  let numbers = [];
+  function getRandomScoresSet(scoreArray) {
+    const shuffled = [...scoreArray].sort(() => 0.5 - Math.random());
+    return new Set(shuffled.slice(0, 5));
   }
+  numbers = getRandomScoresSet(from_current_score);
   const draw = await Draw.create(
     [
       {
@@ -31,7 +43,10 @@ export const runDrawFunc = async (session) => {
     },
     { session },
   );
-  const users = await User.find({ subscriptionStatus: "active" })
+  const users = await User.find({
+    subscriptionStatus: "active",
+    role: { $ne: "admin" },
+  })
     .select("_id name email charityPercentage")
     .session(session)
     .lean();
@@ -58,7 +73,7 @@ export const runDrawFunc = async (session) => {
       scores,
     });
   }
-  return { drawNumbers: [22, 18, 30, 40, 44], eligibleUsers, drawId: draw._id };
+  return { drawNumbers, eligibleUsers, drawId: draw._id };
 };
 
 export const calculateMatches = (userScores, drawNumbers) => {

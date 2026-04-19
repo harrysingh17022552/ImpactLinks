@@ -6,6 +6,10 @@ const winnerSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    userScore: {
+      type: [Number], // 5 score
+      required: true,
+    },
     drawId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Draw",
