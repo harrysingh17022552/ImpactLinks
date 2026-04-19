@@ -12,13 +12,31 @@ import {
   addScoreSchema,
   validateOnlyScore,
 } from "../validations/scoreSchema.js";
+import { subscriptionMiddleware } from "../middlewares/isActive.js";
 
 const router = express.Router();
 
 router.get("/", authMiddleware, getScores);
-router.post("/", authMiddleware, validate(addScoreSchema), addScore);
-router.put("/:id", authMiddleware, validate(validateOnlyScore), updateScore);
-router.delete("/:id", authMiddleware, deleteScore);
-router.get("/eligibility", authMiddleware, getEligibility);
+router.post(
+  "/",
+  authMiddleware,
+  subscriptionMiddleware,
+  validate(addScoreSchema),
+  addScore,
+);
+router.put(
+  "/:id",
+  authMiddleware,
+  subscriptionMiddleware,
+  validate(validateOnlyScore),
+  updateScore,
+);
+router.delete("/:id", authMiddleware, subscriptionMiddleware, deleteScore);
+router.get(
+  "/eligibility",
+  authMiddleware,
+  subscriptionMiddleware,
+  getEligibility,
+);
 
 export default router;
