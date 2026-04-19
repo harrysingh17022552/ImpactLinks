@@ -7,12 +7,13 @@ export const addScore = async (req, res) => {
     return res.status(400).json({ message: "Date required" });
   }
 
-  const inputDate = new Date(date);
-  const today = new Date();
+  const inputDate = new Date(date).setUTCHours(0, 0, 0, 0);
+  const today = new Date().setUTCHours(0, 0, 0, 0);
 
   if (inputDate > today) {
     return res.status(400).json({ message: "Future date not allowed" });
   }
+
   if (inputDate < today) {
     return res.status(400).json({ message: "Past date not allowed" });
   }
@@ -22,22 +23,31 @@ export const addScore = async (req, res) => {
   }
 
   try {
-    // insert
-    await Score.create({ userId, score, date });
+    const existing = await Score.findOne({
+      userId,
+      date: inputDate,
+    });
 
-    // keep only latest 5
-    const scores = await Score.find({ userId }).sort({ date: -1 });
+    if (existing) {
+      existing.score = score;
+      await existing.save();
+    } else {
+      await Score.create({
+        userId,
+        score,
+        date: inputDate,
+      });
+    }
 
+    const scores = await Score.find({ userId }).sort({ date: -1, _id: -1 });
     if (scores.length > 5) {
       const toDelete = scores.slice(5);
       const ids = toDelete.map((s) => s._id);
-
       await Score.deleteMany({ _id: { $in: ids } });
     }
-
-    res.json({ message: "Score added" });
+    res.json({ message: "Score saved successfully" });
   } catch (err) {
-    res.status(400).json({ message: "Duplicate date not allowed" });
+    res.status(500).json({ message: "Error saving score" });
   }
 };
 
