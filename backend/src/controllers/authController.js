@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { envList } from "../../envConfig.js";
 
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
@@ -16,10 +17,7 @@ export const signup = async (req, res) => {
     password: hashed,
   });
 
-  const token = jwt.sign(
-    { id: user._id, role: user.role },
-    process.env.JWT_SECRET,
-  );
+  const token = jwt.sign({ id: user._id, role: user.role }, envList.ACCESS_TOKEN_KEY);
 
   res.json({ token });
 };
@@ -35,7 +33,7 @@ export const login = async (req, res) => {
 
   const token = jwt.sign(
     { id: user._id, role: user.role },
-    process.env.ACCESS_TOKEN_KEY,
+    envList.ACCESS_TOKEN_KEY,
   );
 
   res.json({ token });
